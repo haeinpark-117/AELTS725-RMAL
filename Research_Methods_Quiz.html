@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research Methods Quiz — KHU Applied Linguistics</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: Calibri, 'Segoe UI', sans-serif; background: #E8E3DA; min-height: 100vh; }
+  .container { max-width: 660px; margin: 0 auto; padding: 1.5rem; }
+
+  /* Typography */
+  h1, h2, h3, .btn-primary { font-family: Georgia, 'Times New Roman', serif; }
+  h1 { color: #1A2550; font-size: 1.75rem; margin-bottom: 0.2rem; }
+  .subtitle { color: #888; font-size: 0.95rem; margin-bottom: 1.75rem; }
+
+  /* Cards */
+  .card { background: #fff; border-radius: 12px; border: 1px solid #aaa; padding: 1.5rem; margin-bottom: 1.25rem; }
+
+  /* Topic pills */
+  .pills { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 0.5rem; }
+  .pill { padding: 0.4rem 0.9rem; border-radius: 20px; border: 2px solid #aaa; background: #fff;
+          color: #333; cursor: pointer; font-size: 0.88rem; transition: all 0.2s; }
+  .pill.active { color: #fff; font-weight: 600; }
+
+  /* Buttons */
+  .btn-primary { width: 100%; padding: 0.8rem; border-radius: 10px; background: #2233CC; color: #fff;
+                 border: none; font-size: 1.02rem; font-weight: 600; cursor: pointer; letter-spacing: 0.02em; }
+  .btn-primary:disabled { background: #888; cursor: default; }
+  .btn-row { display: flex; gap: 0.75rem; margin-top: 1rem; }
+  .btn-row button { flex: 1; padding: 0.7rem; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
+  .btn-secondary { background: #fff; color: #333; border: 2px solid #aaa; }
+  .btn-teal { background: #22CCBB; color: #fff; border: none; }
+  .btn-blue { background: #2233CC; color: #fff; border: none; }
+  .btn-secondary:disabled { color: #888; cursor: default; }
+
+  /* Topic badge */
+  .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; color: #fff;
+           font-size: 0.73rem; font-weight: 600; margin-bottom: 0.7rem; }
+
+  /* Question text */
+  .q-text { font-size: 1.05rem; color: #000; line-height: 1.55; margin-bottom: 1.2rem; }
+
+  /* Options */
+  .option { padding: 0.75rem 1rem; border-radius: 8px; border: 2px solid #aaa; background: #fff;
+            margin-bottom: 0.45rem; color: #333; font-size: 0.95rem; cursor: pointer; transition: all 0.15s; }
+  .option.selected { background: #EEF0FF; border-color: #2233CC; color: #2233CC; }
+  .option.correct { background: #E8F5E9; border-color: #22883A; color: #22883A; }
+  .option.incorrect { background: #FDECEA; border-color: #CC2233; color: #CC2233; }
+  .option.locked { cursor: default; }
+
+  /* Explanation */
+  .explanation { margin-top: 1rem; padding: 0.85rem; border-radius: 8px; background: #F5F3EE;
+                 border-left: 4px solid #2233CC; font-size: 0.9rem; color: #333; line-height: 1.5; }
+
+  /* Progress bar */
+  .progress-bar { height: 6px; background: #E0DDD6; border-radius: 3px; margin-bottom: 1.2rem; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; background: #2233CC; transition: width 0.3s ease; }
+
+  /* Header row */
+  .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+  .header-row .back-btn { padding: 0.35rem 0.7rem; border-radius: 8px; border: 1px solid #aaa;
+                          background: #fff; color: #333; cursor: pointer; font-size: 0.85rem; }
+
+  /* Score */
+  .score-big { font-size: 3rem; font-weight: 700; margin: 0.5rem 0; }
+  .score-green { color: #22883A; }
+  .score-yellow { color: #CC8800; }
+  .score-red { color: #CC2233; }
+
+  /* Topic breakdown */
+  .topic-row { display: flex; align-items: center; margin-bottom: 0.4rem; }
+  .topic-dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 0.5rem; flex-shrink: 0; }
+  .topic-label { font-size: 0.9rem; color: #333; flex: 1; }
+  .topic-count { font-size: 0.85rem; color: #888; }
+
+  /* Performance bars */
+  .perf-row { margin-bottom: 0.75rem; }
+  .perf-header { display: flex; justify-content: space-between; margin-bottom: 0.25rem; }
+  .perf-bar { height: 8px; background: #E0DDD6; border-radius: 4px; overflow: hidden; }
+  .perf-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+
+  .muted { color: #888; font-size: 0.85rem; }
+  .text-center { text-align: center; }
+
+  /* Footer */
+  .footer { text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ccc; }
+  .footer p { font-size: 0.8rem; color: #888; }
+</style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+
+<script>
+// ============================================================
+// QUESTIONS DATABASE
+// ============================================================
+const allQuestions = [
+  // SAMPLING (1–8)
+  { id:1, topic:"Sampling", q:"A researcher emails a survey link to all members of a professional organization and uses whoever responds. What type of sampling is this?",
+    options:["Random sampling","Convenience sampling","Stratified random sampling","Cluster sampling"], answer:1,
+    explanation:"This is convenience sampling because only those who voluntarily respond are included — there is no mechanism ensuring every member has an equal chance of being selected." },
+  { id:2, topic:"Sampling", q:"Which sampling method involves dividing the population into subgroups (e.g., by proficiency level) and then randomly selecting from each subgroup?",
+    options:["Systematic sampling","Cluster sampling","Stratified random sampling","Convenience sampling"], answer:2,
+    explanation:"Stratified random sampling divides the population into meaningful subgroups (strata) and randomly samples from each to ensure representation." },
+  { id:3, topic:"Sampling", q:"A researcher selects every 5th student from an alphabetical class roster. This is an example of:",
+    options:["Random sampling","Systematic sampling","Stratified random sampling","Convenience sampling"], answer:1,
+    explanation:"Systematic sampling selects participants at regular intervals (e.g., every kth person) from an ordered list." },
+  { id:4, topic:"Sampling", q:"What is the main limitation of convenience sampling?",
+    options:["It is too expensive","It requires a complete list of the population","It limits generalizability of the findings","It always produces biased results"], answer:2,
+    explanation:"Convenience sampling limits generalizability (external validity) because the sample may not represent the broader population." },
+  { id:5, topic:"Sampling", q:"Which probability sampling method requires a complete list of all members in the population?",
+    options:["Cluster sampling","Convenience sampling","Simple random sampling","Snowball sampling"], answer:2,
+    explanation:"Simple random sampling requires a sampling frame — a complete list of the population — so that every member has an equal chance of selection." },
+  { id:6, topic:"Sampling", q:"A researcher randomly selects 5 out of 20 universities, then surveys ALL students at those 5 universities. This is:",
+    options:["Stratified random sampling","Systematic sampling","Cluster sampling","Convenience sampling"], answer:2,
+    explanation:"Cluster sampling randomly selects entire groups (clusters), then includes all members within the selected clusters." },
+  { id:7, topic:"Sampling", q:"Which of the following is NOT a type of probability sampling?",
+    options:["Stratified random sampling","Systematic sampling","Convenience sampling","Cluster sampling"], answer:2,
+    explanation:"Convenience sampling is nonprobability sampling — participants are selected based on availability, not random selection." },
+  { id:8, topic:"Sampling", q:"A study recruits participants by posting flyers in a university cafeteria. Why might this threaten external validity?",
+    options:["The sample is too large","Only people who visit the cafeteria can participate","Flyers introduce social desirability bias","It violates random assignment"], answer:1,
+    explanation:"This convenience method means only a specific subset of people (cafeteria visitors) can participate, limiting how well the sample represents the broader population." },
+
+  // VALIDITY (9–16)
+  { id:9, topic:"Validity", q:"A questionnaire claims to measure 'motivation to learn English' but only asks about test scores. This is a problem of:",
+    options:["Internal validity","External validity","Construct validity","Ecological validity"], answer:2,
+    explanation:"Construct validity is threatened when the instrument does not adequately represent the construct it claims to measure. Test scores alone do not capture 'motivation.'" },
+  { id:10, topic:"Validity", q:"Which type of validity is concerned with whether findings can be generalized to other populations and settings?",
+    options:["Construct validity","Internal validity","Ecological validity","External validity"], answer:3,
+    explanation:"External validity refers to the extent to which findings can be generalized beyond the specific study to other populations, settings, and conditions." },
+  { id:11, topic:"Validity", q:"A researcher conducts a lab-based vocabulary test that does not reflect how learners use vocabulary in real life. This threatens:",
+    options:["Construct validity","External validity","Internal validity","Ecological validity"], answer:3,
+    explanation:"Ecological validity concerns whether the research conditions reflect real-world situations. A lab test that doesn't mirror real-life use has low ecological validity." },
+  { id:12, topic:"Validity", q:"If a confounding variable (e.g., prior language experience) is not controlled, which type of validity is most directly threatened?",
+    options:["Ecological validity","External validity","Construct validity","Internal validity"], answer:3,
+    explanation:"Internal validity is threatened when confounding variables are not controlled, because the researcher cannot be sure the IV caused the observed effect on the DV." },
+  { id:13, topic:"Validity", q:"A researcher uses a 'willingness to communicate' scale that was validated with adults but administers it to 10-year-olds without modification. This primarily threatens:",
+    options:["Construct validity","Internal validity","External validity","Ecological validity"], answer:0,
+    explanation:"Using a scale with a population it was not designed or validated for threatens construct validity — the items may not measure the same construct in young children." },
+  { id:14, topic:"Validity", q:"Which of the following BEST describes construct validity?",
+    options:["The study results apply to real-world settings","The instrument measures what it claims to measure","The results can be generalized to other populations","The study design rules out alternative explanations"], answer:1,
+    explanation:"Construct validity refers to whether an instrument actually measures the theoretical construct it is intended to measure." },
+  { id:15, topic:"Validity", q:"The Argument-Based Validation (ABV) framework suggests that validity is:",
+    options:["A single statistical test","An ongoing argument supported by multiple types of evidence","Determined solely by Cronbach's alpha","Only relevant for standardized tests"], answer:1,
+    explanation:"ABV treats validity as an argument built from multiple sources of evidence, not a single number or test." },
+  { id:16, topic:"Validity", q:"A study finds that an anxiety treatment reduces test anxiety, but participants were tested in a quiet, distraction-free lab. If students still feel anxious in noisy classrooms, this is a problem of:",
+    options:["Internal validity","Construct validity","Ecological validity","Sampling bias"], answer:2,
+    explanation:"The lab conditions do not reflect the real-world classroom environment, so the findings may not transfer — a threat to ecological validity." },
+
+  // VARIABLES & MEASUREMENT (17–24)
+  { id:17, topic:"Variables", q:"In the RQ 'Does self-confidence predict willingness to communicate?', what is the independent variable?",
+    options:["Willingness to communicate","Self-confidence","English proficiency","Communication frequency"], answer:1,
+    explanation:"Self-confidence is the predictor (IV) and willingness to communicate is the outcome (DV)." },
+  { id:18, topic:"Variables", q:"A variable that the researcher does not manipulate but that may influence the DV is called a:",
+    options:["Dependent variable","Independent variable","Confounding variable","Nominal variable"], answer:2,
+    explanation:"A confounding variable is an extraneous variable that co-varies with the IV and may provide an alternative explanation for the results." },
+  { id:19, topic:"Variables", q:"Which measurement scale allows ranking but does NOT assume equal intervals between values?",
+    options:["Nominal","Ordinal","Interval","Ratio"], answer:1,
+    explanation:"Ordinal scales rank items in order (e.g., 1st, 2nd, 3rd) but the distances between ranks are not necessarily equal." },
+  { id:20, topic:"Variables", q:"'Gender' coded as 1 = Male, 2 = Female, 3 = Other is measured on which scale?",
+    options:["Ordinal","Interval","Nominal","Ratio"], answer:2,
+    explanation:"Gender is a nominal (categorical) variable — the numbers are labels, not meaningful quantities." },
+  { id:21, topic:"Variables", q:"A Likert scale from 1 (Strongly Disagree) to 5 (Strongly Agree) is typically treated as:",
+    options:["Nominal","Ratio","Ordinal (sometimes treated as interval)","Nominal (sometimes treated as ordinal)"], answer:2,
+    explanation:"Likert scales are technically ordinal, but in applied research they are often treated as interval for statistical analysis — this is a debated convention." },
+  { id:22, topic:"Variables", q:"Operationalization refers to:",
+    options:["Choosing the correct statistical test","Defining how a construct will be measured in a specific study","Running a pilot study","Selecting the sample"], answer:1,
+    explanation:"Operationalization is the process of defining how an abstract construct (e.g., motivation) will be concretely measured (e.g., via a 15-item Likert questionnaire)." },
+  { id:23, topic:"Variables", q:"A researcher studying the effect of study abroad on fluency controls for prior language experience. 'Prior language experience' functions as a:",
+    options:["Dependent variable","Independent variable","Control variable","Ordinal variable"], answer:2,
+    explanation:"A control variable is held constant or statistically accounted for to isolate the effect of the IV on the DV." },
+  { id:24, topic:"Variables", q:"Which measurement scale has a true zero point, allowing statements like 'twice as much'?",
+    options:["Nominal","Ordinal","Interval","Ratio"], answer:3,
+    explanation:"Ratio scales have a meaningful zero (e.g., number of errors = 0 means no errors), which allows ratio comparisons." },
+
+  // QUESTIONNAIRE DESIGN (25–34)
+  { id:25, topic:"Questionnaire Design", q:"\"I enjoy reading and I think it improves my vocabulary.\" What is wrong with this item?",
+    options:["It uses jargon","It is double-barreled","It is leading","There is no problem"], answer:1,
+    explanation:"This is a double-barreled item — it asks about two things (enjoyment of reading AND its effect on vocabulary). A respondent might agree with one but not the other." },
+  { id:26, topic:"Questionnaire Design", q:"\"I don't think grammar instruction is not useful.\" This item is problematic because:",
+    options:["It uses technical jargon","It contains a double negation","It is leading the respondent","The scale is inappropriate"], answer:1,
+    explanation:"The double negation ('don't' + 'not') creates confusion — respondents may not know whether agreeing means grammar IS or IS NOT useful." },
+  { id:27, topic:"Questionnaire Design", q:"\"Most experts agree that extensive reading is essential. Do you read extensively?\" This item is flawed because:",
+    options:["It uses jargon","It is double-barreled","It is leading/socially desirable","It has scale mismatch"], answer:2,
+    explanation:"By stating what 'most experts agree,' the item pressures respondents toward a socially desirable answer — this is a leading item." },
+  { id:28, topic:"Questionnaire Design", q:"\"EMI courses facilitate the acquisition of domain-specific lexicon.\" This item is problematic for survey respondents because:",
+    options:["It is double-barreled","It contains too much technical jargon","It is a leading question","There is no problem"], answer:1,
+    explanation:"Terms like 'domain-specific lexicon' and 'facilitate acquisition' are academic jargon that typical survey respondents may not understand." },
+  { id:29, topic:"Questionnaire Design", q:"An item asks \"How many EMI courses have you taken?\" with response options: 1 = Strongly Agree … 5 = Strongly Disagree. This is an example of:",
+    options:["Double-barreled item","Leading question","Scale mismatch","Jargon"], answer:2,
+    explanation:"The question asks about quantity (how many), but the scale measures agreement. The response options do not match the question." },
+  { id:30, topic:"Questionnaire Design", q:"Which of the following is a well-written Likert-scale item?",
+    options:["I enjoy speaking English and I feel confident doing it.","Don't you think English is not important?","I feel comfortable participating in English discussions.","Pragmatic competence facilitates interactional exchanges."], answer:2,
+    explanation:"This item addresses a single concept, uses clear language, avoids jargon, and works naturally with an agree–disagree scale." },
+  { id:31, topic:"Questionnaire Design", q:"What is the primary purpose of piloting a questionnaire?",
+    options:["To increase the sample size","To identify confusing or problematic items before the main study","To determine the statistical significance of the results","To publish preliminary findings"], answer:1,
+    explanation:"Piloting allows the researcher to test the instrument on a small group first, identifying unclear items, technical issues, or response problems before the actual data collection." },
+  { id:32, topic:"Questionnaire Design", q:"A survey about study habits has 85 items and takes 45 minutes. Which response bias is MOST likely?",
+    options:["Social desirability bias","Halo effect","Fatigue effect","Acquiescence bias"], answer:2,
+    explanation:"Long surveys cause fatigue, leading respondents to rush, skip items, or give random answers toward the end." },
+  { id:33, topic:"Questionnaire Design", q:"When a respondent tends to agree with statements regardless of content, this is called:",
+    options:["Social desirability bias","Acquiescence bias","Halo effect","Fatigue effect"], answer:1,
+    explanation:"Acquiescence bias (or 'yea-saying') is the tendency to agree with statements regardless of their actual content." },
+  { id:34, topic:"Questionnaire Design", q:"Social desirability bias occurs when respondents:",
+    options:["Get tired and stop paying attention","Answer in ways they think are socially acceptable rather than truthful","Agree with every statement","Misunderstand technical vocabulary"], answer:1,
+    explanation:"Social desirability bias leads respondents to select answers that present themselves in a favorable light rather than reporting honestly." },
+
+  // REVERSE-CODED & COMPOSITE SCALES (35–39)
+  { id:35, topic:"Scales & Scoring", q:"Why do researchers include reverse-coded items in a questionnaire?",
+    options:["To make the survey shorter","To detect careless responding and reduce acquiescence bias","To increase the Cronbach's alpha","To simplify data analysis"], answer:1,
+    explanation:"Reverse-coded items require respondents to shift their thinking, which helps detect careless responding and counteracts the tendency to always agree." },
+  { id:36, topic:"Scales & Scoring", q:"On a 5-point Likert scale, if a reverse-coded item receives a raw score of 2, the recoded score is:",
+    options:["1","2","3","4"], answer:3,
+    explanation:"Reverse coding on a 5-point scale: 1↔5, 2↔4, 3 stays 3. So a raw score of 2 becomes 4." },
+  { id:37, topic:"Scales & Scoring", q:"A composite scale score is calculated by:",
+    options:["Using only the highest-rated item","Averaging or summing scores across multiple items measuring the same construct","Counting the number of 'Strongly Agree' responses","Dividing the total score by the number of constructs"], answer:1,
+    explanation:"A composite score aggregates (sums or averages) responses across multiple items that measure the same underlying construct." },
+  { id:38, topic:"Scales & Scoring", q:"On a 5-point scale, a reverse-coded item with a raw score of 5 would be recoded as:",
+    options:["5","4","2","1"], answer:3,
+    explanation:"Reverse coding formula: new score = (max + 1) − raw score. So (5 + 1) − 5 = 1." },
+  { id:39, topic:"Scales & Scoring", q:"A scale has 3 positively-worded items and 1 negatively-worded item. Before computing a composite score, the researcher must:",
+    options:["Remove the negative item","Reverse-code the negative item so all items are in the same direction","Double the weight of the negative item","Nothing — compute the composite directly"], answer:1,
+    explanation:"Before computing a composite score, negatively-worded items must be reverse-coded so that high scores consistently indicate the same direction of the construct." },
+
+  // EFA & CFA (40–46)
+  { id:40, topic:"Factor Analysis", q:"What is the primary purpose of Exploratory Factor Analysis (EFA)?",
+    options:["To confirm a pre-specified factor structure","To discover the underlying factor structure of a set of items","To calculate Cronbach's alpha","To determine the sample size"], answer:1,
+    explanation:"EFA is used to explore and discover how items group together into factors (sub-scales) without a pre-determined structure." },
+  { id:41, topic:"Factor Analysis", q:"How does Confirmatory Factor Analysis (CFA) differ from EFA?",
+    options:["CFA is used when no prior theory exists","CFA tests whether data fit a pre-specified factor structure","CFA always produces higher reliability","CFA does not use factor loadings"], answer:1,
+    explanation:"CFA tests whether the observed data fit a hypothesized factor structure — it is theory-driven, whereas EFA is exploratory." },
+  { id:42, topic:"Factor Analysis", q:"A factor loading of .72 on Factor 1 means:",
+    options:["The item is unreliable","72% of respondents chose that item","The item has a strong relationship with Factor 1","The item should be deleted"], answer:2,
+    explanation:"A factor loading is like a correlation between an item and a factor. A loading of .72 indicates a strong relationship — the item 'belongs' to that factor." },
+  { id:43, topic:"Factor Analysis", q:"An item loads at .55 on Factor 1 and .48 on Factor 2. This is called:",
+    options:["Clean loading","No loading","Cross-loading","Negative loading"], answer:2,
+    explanation:"Cross-loading occurs when an item loads substantially (above the threshold, typically .40) on more than one factor, indicating it does not clearly belong to a single sub-scale." },
+  { id:44, topic:"Factor Analysis", q:"An item with loadings below .40 on ALL factors is described as:",
+    options:["Cross-loading","Clean loading","No loading","Reverse loading"], answer:2,
+    explanation:"If an item does not reach the minimum loading threshold (commonly .40) on any factor, it has 'no loading' and does not contribute meaningfully to any sub-scale." },
+  { id:45, topic:"Factor Analysis", q:"What should a researcher typically do with a cross-loading item?",
+    options:["Keep it on all factors","Revise or remove it, as it does not clearly belong to one sub-scale","Increase the sample size","Change it to a reverse-coded item"], answer:1,
+    explanation:"Cross-loading items are ambiguous and should typically be revised (reworded) or removed to achieve a cleaner factor structure." },
+  { id:46, topic:"Factor Analysis", q:"In factor analysis, the term 'factor' is essentially equivalent to:",
+    options:["A single questionnaire item","A sub-scale","The entire questionnaire","Cronbach's alpha"], answer:1,
+    explanation:"A factor represents a group of items that cluster together statistically — this corresponds to a sub-scale, which is a conceptual grouping of related items." },
+
+  // RELIABILITY (47–52)
+  { id:47, topic:"Reliability", q:"Cronbach's alpha measures:",
+    options:["Whether the instrument measures what it claims to measure","The internal consistency of a set of items","The generalizability of the findings","The factor structure of the instrument"], answer:1,
+    explanation:"Cronbach's alpha assesses internal consistency — the degree to which items in a scale are interrelated and measure the same underlying construct." },
+  { id:48, topic:"Reliability", q:"A Cronbach's alpha of .54 would generally be considered:",
+    options:["Excellent","Good","Acceptable","Questionable / unacceptable"], answer:3,
+    explanation:"Alpha values below .70 are generally considered questionable. A value of .54 suggests that the items are not consistently measuring the same construct." },
+  { id:49, topic:"Reliability", q:"Which Cronbach's alpha value is generally considered the minimum acceptable threshold in applied linguistics research?",
+    options:[".60",".70",".80",".90"], answer:1,
+    explanation:"The commonly accepted minimum threshold is .70. Values above .80 are considered good, and above .90 excellent." },
+  { id:50, topic:"Reliability", q:"A sub-scale has a Cronbach's alpha of .54. Which of the following is the BEST course of action?",
+    options:["Report it and proceed with analysis","Examine item-total correlations and consider revising or removing weak items","Increase the Likert scale from 5 to 7 points","Switch to CFA"], answer:1,
+    explanation:"When alpha is low, researchers should examine item-total correlations to identify which items are weakening internal consistency, then revise or remove those items." },
+  { id:51, topic:"Reliability", q:"If deleting one item from a 6-item sub-scale raises Cronbach's alpha from .58 to .79, the researcher should probably:",
+    options:["Keep all items for content coverage","Delete the item and report the improved alpha","Add more items instead","Switch to a different reliability measure"], answer:1,
+    explanation:"If removing a single item substantially improves alpha above the acceptable threshold, it is generally advisable to remove it — the item was likely not measuring the same construct." },
+  { id:52, topic:"Reliability", q:"Cronbach's alpha and McDonald's omega both measure internal consistency. What is a key advantage of omega?",
+    options:["Omega is always higher than alpha","Omega does not assume that all items contribute equally to the construct","Omega requires fewer items","Omega does not require factor analysis"], answer:1,
+    explanation:"Unlike Cronbach's alpha (which assumes tau-equivalence — equal factor loadings), McDonald's omega accounts for varying item contributions, making it a more flexible and often more accurate measure." }
+];
+
+// ============================================================
+// APP STATE & HELPERS
+// ============================================================
+const TOPICS = ["All", ...Array.from(new Set(allQuestions.map(q => q.topic)))];
+const topicColors = {
+  "Sampling":"#2233CC","Validity":"#22CCBB","Variables":"#DD2288",
+  "Questionnaire Design":"#7744CC","Scales & Scoring":"#AACC00",
+  "Factor Analysis":"#2233CC","Reliability":"#22CCBB"
+};
+
+let state = {
+  mode: "home", selectedTopic: "All", questions: [], currentIdx: 0,
+  selected: null, showAnswer: false, answers: {}, quizComplete: false
+};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function filteredPool() {
+  return state.selectedTopic === "All" ? allQuestions : allQuestions.filter(q => q.topic === state.selectedTopic);
+}
+
+function score() {
+  return Object.values(state.answers).filter(a => a.selected === a.correct).length;
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+const app = document.getElementById("app");
+
+function render() {
+  if (state.mode === "home") renderHome();
+  else if (state.mode === "quiz" && state.quizComplete) renderResults();
+  else if (state.mode === "review") renderReview();
+  else renderQuiz();
+}
+
+function renderHome() {
+  const pool = filteredPool();
+  let topicBreakdown = TOPICS.filter(t => t !== "All").map(topic => {
+    const count = allQuestions.filter(q => q.topic === topic).length;
+    const col = topicColors[topic] || "#1A2550";
+    return `<div class="topic-row">
+      <div class="topic-dot" style="background:${col}"></div>
+      <span class="topic-label">${topic}</span>
+      <span class="topic-count">${count} Qs</span>
+    </div>`;
+  }).join("");
+
+  let pills = TOPICS.map(topic => {
+    const active = state.selectedTopic === topic;
+    const col = topicColors[topic] || "#1A2550";
+    const style = active ? `background:${col};border-color:${col};color:#fff` : "";
+    return `<span class="pill ${active?"active":""}" style="${style}" onclick="selectTopic('${topic}')">${topic}</span>`;
+  }).join("");
+
+  app.innerHTML = `
+    <h1>Research Methods Quiz</h1>
+    <p class="subtitle">Test your knowledge of key concepts from the course</p>
+    <div class="card">
+      <h2 style="font-family:Georgia,serif;font-size:1.1rem;color:#333;margin-bottom:0.75rem">Select a Topic</h2>
+      <div class="pills">${pills}</div>
+      <p class="muted" style="margin-top:0.6rem">${pool.length} question${pool.length!==1?"s":""} available</p>
+    </div>
+    <button class="btn-primary" onclick="startQuiz()">Start Quiz</button>
+    <div class="card" style="margin-top:1.25rem">
+      <h3 style="font-family:Georgia,serif;font-size:1rem;color:#333;margin-bottom:0.75rem">Topic Breakdown</h3>
+      ${topicBreakdown}
+    </div>
+    <div class="footer"><p>Research Methods in Applied Linguistics — Kyung Hee University</p></div>
+  `;
+}
+
+function renderQuiz() {
+  const q = state.questions[state.currentIdx];
+  const col = topicColors[q.topic] || "#1A2550";
+  const progress = ((state.currentIdx + (state.showAnswer ? 1 : 0)) / state.questions.length) * 100;
+
+  let opts = q.options.map((opt, i) => {
+    let cls = "option";
+    if (state.showAnswer) {
+      cls += " locked";
+      if (i === q.answer) cls += " correct";
+      else if (i === state.selected) cls += " incorrect";
+    } else if (i === state.selected) cls += " selected";
+
+    let prefix = "";
+    if (state.showAnswer && i === q.answer) prefix = "✓ ";
+    if (state.showAnswer && i === state.selected && i !== q.answer) prefix = "✗ ";
+
+    return `<div class="${cls}" ${state.showAnswer ? "" : `onclick="selectOption(${i})"`}>${prefix}${opt}</div>`;
+  }).join("");
+
+  let explanation = state.showAnswer ? `<div class="explanation" style="border-left-color:${col}"><strong>Explanation:</strong> ${q.explanation}</div>` : "";
+  let btnLabel = state.showAnswer ? (state.currentIdx < state.questions.length - 1 ? "Next Question →" : "See Results") : "Check Answer";
+  let btnDisabled = state.selected === null && !state.showAnswer;
+
+  app.innerHTML = `
+    <div class="header-row">
+      <button class="back-btn" onclick="goHome()">← Quit</button>
+      <span class="muted">${state.currentIdx+1} / ${state.questions.length}</span>
+      <span style="color:#22883A;font-weight:600;font-size:0.9rem">${score()} correct</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+    <div class="card">
+      <div class="badge" style="background:${col}">${q.topic}</div>
+      <p class="q-text">${q.q}</p>
+      ${opts}
+      ${explanation}
+    </div>
+    <button class="btn-primary" ${btnDisabled?"disabled":""} onclick="${state.showAnswer?"nextQuestion()":"checkAnswer()"}">${btnLabel}</button>
+  `;
+}
+
+function renderResults() {
+  const s = score(), total = Object.keys(state.answers).length;
+  const pct = Math.round((s/total)*100);
+  const colClass = pct >= 80 ? "score-green" : pct >= 60 ? "score-yellow" : "score-red";
+  const msg = pct >= 80 ? "Excellent work! You have a strong grasp of the material." :
+              pct >= 60 ? "Good effort! Review the topics you missed." :
+              "Keep studying — revisit the areas below and try again.";
+
+  // by topic
+  const byTopic = {};
+  state.questions.forEach((q, i) => {
+    if (!byTopic[q.topic]) byTopic[q.topic] = { correct:0, total:0 };
+    byTopic[q.topic].total++;
+    if (state.answers[i] && state.answers[i].selected === state.answers[i].correct) byTopic[q.topic].correct++;
+  });
+
+  let perfBars = Object.entries(byTopic).map(([topic, data]) => {
+    const tp = Math.round((data.correct/data.total)*100);
+    const bc = tp >= 80 ? "#22883A" : tp >= 60 ? "#CC8800" : "#CC2233";
+    return `<div class="perf-row">
+      <div class="perf-header"><span style="font-size:0.9rem;color:#333">${topic}</span><span class="muted">${data.correct}/${data.total} (${tp}%)</span></div>
+      <div class="perf-bar"><div class="perf-fill" style="width:${tp}%;background:${bc}"></div></div>
+    </div>`;
+  }).join("");
+
+  app.innerHTML = `
+    <div class="card text-center">
+      <h1 style="font-family:Georgia,serif;color:#1A2550;font-size:1.6rem">Quiz Complete!</h1>
+      <div class="score-big ${colClass}">${pct}%</div>
+      <p style="color:#333;font-size:1.05rem">${s} out of ${total} correct</p>
+      <p class="muted" style="margin-top:0.4rem">${msg}</p>
+    </div>
+    <div class="card">
+      <h3 style="font-family:Georgia,serif;font-size:1.05rem;color:#333;margin-bottom:1rem">Performance by Topic</h3>
+      ${perfBars}
+    </div>
+    <div class="btn-row">
+      <button class="btn-teal" onclick="startReview()">Review Answers</button>
+      <button class="btn-secondary" onclick="goHome()">New Quiz</button>
+    </div>
+    <div class="footer"><p>Research Methods in Applied Linguistics — Kyung Hee University</p></div>
+  `;
+}
+
+function renderReview() {
+  const q = state.questions[state.currentIdx];
+  const a = state.answers[state.currentIdx];
+  const col = topicColors[q.topic] || "#1A2550";
+
+  let opts = q.options.map((opt, i) => {
+    const isCorrect = i === q.answer;
+    const wasSelected = a && a.selected === i;
+    let cls = "option locked";
+    if (isCorrect) cls += " correct";
+    if (wasSelected && !isCorrect) cls += " incorrect";
+    let prefix = "";
+    if (wasSelected && !isCorrect) prefix = "✗ ";
+    if (isCorrect) prefix = "✓ ";
+    return `<div class="${cls}">${prefix}${opt}</div>`;
+  }).join("");
+
+  const isLast = state.currentIdx >= state.questions.length - 1;
+
+  app.innerHTML = `
+    <div class="header-row">
+      <button class="back-btn" onclick="goHome()">← Back</button>
+      <span class="muted">Review ${state.currentIdx+1} / ${state.questions.length}</span>
+    </div>
+    <div class="card">
+      <div class="badge" style="background:${col}">${q.topic}</div>
+      <p class="q-text">${q.q}</p>
+      ${opts}
+      <div class="explanation" style="border-left-color:${col}"><strong>Explanation:</strong> ${q.explanation}</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-secondary" ${state.currentIdx===0?"disabled":""} onclick="reviewPrev()">← Previous</button>
+      <button class="btn-blue" onclick="${isLast?"goHome()":"reviewNext()"}">${isLast?"Done":"Next →"}</button>
+    </div>
+  `;
+}
+
+// ============================================================
+// EVENT HANDLERS
+// ============================================================
+window.selectTopic = function(topic) { state.selectedTopic = topic; render(); };
+
+window.startQuiz = function() {
+  state.questions = shuffle(filteredPool());
+  state.currentIdx = 0; state.selected = null; state.showAnswer = false;
+  state.answers = {}; state.quizComplete = false; state.mode = "quiz";
+  render();
+};
+
+window.selectOption = function(i) { if (!state.showAnswer) { state.selected = i; render(); } };
+
+window.checkAnswer = function() {
+  if (state.selected === null) return;
+  state.showAnswer = true;
+  state.answers[state.currentIdx] = { selected: state.selected, correct: state.questions[state.currentIdx].answer };
+  render();
+};
+
+window.nextQuestion = function() {
+  if (state.currentIdx < state.questions.length - 1) {
+    state.currentIdx++; state.selected = null; state.showAnswer = false;
+  } else { state.quizComplete = true; }
+  render();
+};
+
+window.startReview = function() { state.mode = "review"; state.currentIdx = 0; render(); };
+window.reviewPrev = function() { if (state.currentIdx > 0) { state.currentIdx--; render(); } };
+window.reviewNext = function() { if (state.currentIdx < state.questions.length - 1) { state.currentIdx++; render(); } };
+window.goHome = function() { state.mode = "home"; render(); };
+
+// Initial render
+render();
+</script>
+</body>
+</html>
